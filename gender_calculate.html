@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人類性別遺傳機率模擬實驗數據統計</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤰人類性別遺傳機率模擬實驗數據統計表</h1>
+    <div>
+        <label for="experimentCount">💕 模擬實驗次數：</label>
+        <input type="number" id="experimentCount" min="0">
+    </div>
+    <div>
+        <label for="boyCount">👦🏻 男孩(XY)幾位：</label>
+        <input type="number" id="boyCount" min="0">
+    </div>
+    <div>
+        <label for="girlCount">👧🏻 女孩(XX)幾位：</label>
+        <input type="number" id="girlCount" min="0">
+    </div>
+    <button onclick="addData()">新增實驗數據</button>
+    <div id="errorMessage" class="error"></div>
+
+    <h2>實驗結果統計</h2>
+    <div id="statistics"></div>
+
+    <h2>實驗數據紀錄表</h2>
+    <table id="dataTable">
+        <tr>
+            <th>組別(組員)</th>
+            <th>💕模擬實驗(次)</th>
+            <th>👦🏻男孩(位)</th>
+            <th>👧🏻女孩(位)</th>
+            <th>👦🏻男孩(XY)機率</th>
+            <th>👧🏻女孩(XX)機率</th>
+        </tr>
+    </table>
+
+    <script>
+        let totalExperiments = 0;
+        let totalBoys = 0;
+        let totalGirls = 0;
+        let groupCount = 0;
+
+        function addData() {
+            const experimentCount = parseInt(document.getElementById('experimentCount').value) || 0;
+            const boyCount = parseInt(document.getElementById('boyCount').value) || 0;
+            const girlCount = parseInt(document.getElementById('girlCount').value) || 0;
+            const errorElement = document.getElementById('errorMessage');
+
+            if (experimentCount !== boyCount + girlCount) {
+                errorElement.textContent = "您輸入的實驗次數不等於男孩加女孩的次數，請檢查後重新輸入。";
+                return;
+            }
+
+            errorElement.textContent = ""; // 清除錯誤消息
+            groupCount++;
+            totalExperiments += experimentCount;
+            totalBoys += boyCount;
+            totalGirls += girlCount;
+
+            updateStatistics();
+            addTableRow(groupCount, experimentCount, boyCount, girlCount);
+            clearInputs();
+        }
+
+        function updateStatistics() {
+            const boyProbability = totalExperiments > 0 ? (totalBoys / totalExperiments) * 100 : 0;
+            const girlProbability = totalExperiments > 0 ? (totalGirls / totalExperiments) * 100 : 0;
+
+            const statisticsHtml = `
+                <p>💕 模擬實驗總次數：${totalExperiments}次</p>
+                <p>👦🏻 男孩(XY)總數：${totalBoys}位</p>
+                <p>👧🏻 女孩(XX)總數：${totalGirls}位</p>
+                <p>👦🏻 生出男孩的機率：${boyProbability.toFixed(2)}%</p>
+                <p>👧🏻 生出女孩的機率：${girlProbability.toFixed(2)}%</p>
+            `;
+
+            document.getElementById('statistics').innerHTML = statisticsHtml;
+        }
+
+        function addTableRow(group, experimentCount, boyCount, girlCount) {
+            const table = document.getElementById('dataTable');
+            const newRow = table.insertRow(-1);
+            const boyProbability = (boyCount / experimentCount) * 100;
+            const girlProbability = (girlCount / experimentCount) * 100;
+
+            newRow.innerHTML = `
+                <td>${group}</td>
+                <td>${experimentCount}</td>
+                <td>${boyCount}</td>
+                <td>${girlCount}</td>
+                <td>${boyProbability.toFixed(2)}%</td>
+                <td>${girlProbability.toFixed(2)}%</td>
+            `;
+        }
+
+        function clearInputs() {
+            document.getElementById('experimentCount').value = '';
+            document.getElementById('boyCount').value = '';
+            document.getElementById('girlCount').value = '';
+        }
+    </script>
+</body>
+</html>

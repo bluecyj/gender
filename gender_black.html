@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人類性別遺傳機率模擬實驗</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-area {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .cell-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .emoji-container {
+            display: flex;
+            align-items: center;
+        }
+        .emoji {
+            font-size: 50px;
+            margin-right: 10px;
+        }
+        .chromosome {
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 5px 10px;
+            text-align: center;
+        }
+        #statistics {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>人類性別遺傳機率模擬實驗</h1>
+    <div class="game-area">
+        <div class="cell-container">
+            <div class="emoji-container">
+                <div class="emoji">🧔🏻</div>
+                <div class="chromosome">男人(XY)</div>
+            </div>
+            <button id="spermBtn">產生精細胞</button>
+            <div id="spermCell" class="cell"></div>
+        </div>
+        <div class="cell-container">
+            <div class="emoji-container">
+                <div class="emoji">👩🏻</div>
+                <div class="chromosome">女人(XX)</div>
+            </div>
+            <button id="eggBtn">產生卵細胞</button>
+            <div id="eggCell" class="cell"></div>
+        </div>
+    </div>
+    <div id="result"></div>
+    <div id="controls" style="display: none;">
+        <button id="continueBtn">繼續實驗</button>
+        <button id="endBtn">結束實驗</button>
+        <button id="newResetBtn">重置實驗</button>
+    </div>
+    <div id="statistics"></div>
+    <table id="resultTable">
+        <tr>
+            <th>💕模擬實驗</th>
+            <th>👦🏻男孩(XY)</th>
+            <th>👧🏻女孩(XX)</th>
+        </tr>
+    </table>
+
+    <script>
+        let spermGenerated = false;
+        let eggGenerated = false;
+        let totalExperiments = 0;
+        let totalBoys = 0;
+        let totalGirls = 0;
+
+        const spermBtn = document.getElementById('spermBtn');
+        const eggBtn = document.getElementById('eggBtn');
+        const spermCell = document.getElementById('spermCell');
+        const eggCell = document.getElementById('eggCell');
+        const result = document.getElementById('result');
+        const controls = document.getElementById('controls');
+        const continueBtn = document.getElementById('continueBtn');
+        const endBtn = document.getElementById('endBtn');
+        const newResetBtn = document.getElementById('newResetBtn');
+        const resultTable = document.getElementById('resultTable');
+        const statistics = document.getElementById('statistics');
+
+        spermBtn.addEventListener('click', generateSperm);
+        eggBtn.addEventListener('click', generateEgg);
+        continueBtn.addEventListener('click', continueExperiment);
+        endBtn.addEventListener('click', endExperiment);
+        newResetBtn.addEventListener('click', resetExperiment);
+
+        function generateSperm() {
+            if (spermGenerated) {
+                alert('只能產生一個精細胞與一個卵細胞哦！');
+                return;
+            }
+            const chromosome = Math.random() < 0.5 ? 'X' : 'Y';
+            spermCell.style.backgroundColor = 'lightblue';
+            spermCell.textContent = chromosome;
+            spermGenerated = true;
+            checkResult();
+        }
+
+        function generateEgg() {
+            if (eggGenerated) {
+                alert('只能產生一個精細胞與一個卵細胞哦！');
+                return;
+            }
+            eggCell.style.backgroundColor = 'pink';
+            eggCell.textContent = 'X';
+            eggGenerated = true;
+            checkResult();
+        }
+
+        function checkResult() {
+            if (spermGenerated && eggGenerated) {
+                totalExperiments++;
+                let babyGender;
+                let babyEmoji;
+                let babyChromosome;
+
+                if (spermCell.textContent === 'X') {
+                    babyGender = '女孩';
+                    babyChromosome = '(XX)';
+                    totalGirls++;
+                    babyEmoji = '👧🏻';
+                } else {
+                    babyGender = '男孩';
+                    babyChromosome = '(XY)';
+                    totalBoys++;
+                    babyEmoji = '👦🏻';
+                }
+
+                result.innerHTML = `你生出了一位可愛的${babyGender}${babyChromosome}哦！ ${babyEmoji}`;
+                controls.style.display = 'block';
+
+                const newRow = resultTable.insertRow(-1);
+                const cellCount = newRow.insertCell(0);
+                const cellBoy = newRow.insertCell(1);
+                const cellGirl = newRow.insertCell(2);
+
+                cellCount.textContent = totalExperiments;
+                cellBoy.textContent = babyGender === '男孩' ? '✓' : '';
+                cellGirl.textContent = babyGender === '女孩' ? '✓' : '';
+
+                updateStatistics();
+            }
+        }
+
+        function continueExperiment() {
+            resetCells();
+            result.textContent = '';
+            controls.style.display = 'none';
+        }
+
+        function endExperiment() {
+            result.innerHTML = `<p>實驗結束！最終統計數據如下：</p>`;
+            updateStatistics();
+            controls.style.display = 'block';
+        }
+
+        function resetExperiment() {
+            resetCells();
+            result.textContent = '';
+            controls.style.display = 'none';
+            totalExperiments = 0;
+            totalBoys = 0;
+            totalGirls = 0;
+            while (resultTable.rows.length > 1) {
+                resultTable.deleteRow(1);
+            }
+            updateStatistics();
+        }
+
+        function resetCells() {
+            spermCell.style.backgroundColor = '';
+            spermCell.textContent = '';
+            eggCell.style.backgroundColor = '';
+            eggCell.textContent = '';
+            spermGenerated = false;
+            eggGenerated = false;
+        }
+
+        function updateStatistics() {
+            const boyProbability = totalExperiments > 0 ? (totalBoys / totalExperiments * 100).toFixed(2) : 0;
+            const girlProbability = totalExperiments > 0 ? (totalGirls / totalExperiments * 100).toFixed(2) : 0;
+
+            statistics.innerHTML = `
+                <p>💕實驗總次數: ${totalExperiments}次</p>
+                <p>👦🏻男孩共 ${totalBoys} 位</p>
+                <p>👦🏻生出男孩的機率: ${boyProbability}%</p>
+                <p>👧🏻女孩共 ${totalGirls} 位</p>
+                <p>👧🏻生出女孩的機率: ${girlProbability}%</p>
+            `;
+        }
+    </script>
+</body>
+</html>
